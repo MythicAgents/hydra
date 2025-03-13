@@ -2,38 +2,7 @@ from mythic_container.EventingBase import *
 import importlib.util
 
 
-async def task_intercept(msg: TaskInterceptMessage) -> TaskInterceptMessageResponse:
-    logger.info("called task_intercept")
-    funcResponse = TaskInterceptMessageResponse(Success=True, TaskID=msg.TaskID, BlockTask=False)
-    func = await get_file_and_function(filename=msg.Inputs["filename"], function_name=msg.Inputs["function"])
-    if func:
-        funcResponse.StdOut = "found the function"
-        funcResponse = await func(msg)
-    else:
-        funcResponse.StdErr = "failed to find the function"
-    funcResponse.EventStepInstanceID = msg.EventStepInstanceID
-    logger.info("returning from task_intercept")
-    return funcResponse
-
-
-async def response_intercept(msg: ResponseInterceptMessage) -> ResponseInterceptMessageResponse:
-    logger.info("called response_intercept")
-    funcResponse = ResponseInterceptMessageResponse(Response=msg.Environment["user_output"])
-    func = await get_file_and_function(filename=msg.Inputs["filename"], function_name=msg.Inputs["function"])
-    if func:
-        funcResponse.StdOut = "found the function"
-        funcResponse = await func(msg)
-    else:
-        funcResponse.StdErr = "failed to find the function"
-    funcResponse.EventStepInstanceID = msg.EventStepInstanceID
-    logger.info("returning from response_intercept")
-    return funcResponse
-
-
 class Hydra(Eventing):
-    task_intercept_function = task_intercept
-    response_intercept_function = response_intercept
-
     def __init__(self, **kwargs):
         self.name = "hydra"
         self.description = "Dynamically execute scripts for use with Eventing"
@@ -52,16 +21,45 @@ class Hydra(Eventing):
             )
         ]
 
+    async def task_intercept_function(self, msg: TaskInterceptMessage) -> TaskInterceptMessageResponse:
+        logger.info("called task_intercept")
+        funcResponse = TaskInterceptMessageResponse(Success=True, TaskID=msg.TaskID, BlockTask=False)
+        func = await get_file_and_function(filename=msg.Inputs["custom_filename"], function_name=msg.Inputs["custom_function"])
+        if func:
+            funcResponse.StdOut = "found the function"
+            funcResponse = await func(msg)
+        else:
+            funcResponse.StdErr = "failed to find the function"
+        funcResponse.EventStepInstanceID = msg.EventStepInstanceID
+        funcResponse.TaskID = msg.TaskID
+        logger.info("returning from task_intercept")
+        return funcResponse
+
+
+    async def response_intercept_function(self, msg: ResponseInterceptMessage) -> ResponseInterceptMessageResponse:
+        logger.info("called response_intercept")
+        funcResponse = ResponseInterceptMessageResponse(Response=msg.Environment["user_output"])
+        func = await get_file_and_function(filename=msg.Inputs["custom_filename"], function_name=msg.Inputs["custom_function"])
+        if func:
+            funcResponse.StdOut = "found the function"
+            funcResponse = await func(msg)
+        else:
+            funcResponse.StdErr = "failed to find the function"
+        funcResponse.EventStepInstanceID = msg.EventStepInstanceID
+        funcResponse.ResponseID = msg.ResponseID
+        logger.info("returning from response_intercept")
+        return funcResponse
+
     async def on_container_start(self, message: ContainerOnStartMessage) -> ContainerOnStartMessageResponse:
         return ContainerOnStartMessageResponse()
 
     async def conditional_check(self, msg: ConditionalCheckEventingMessage) -> ConditionalCheckEventingMessageResponse:
         logger.info("called conditional_check")
         funcResponse = ConditionalCheckEventingMessageResponse(Success=False)
-        func = await get_file_and_function(filename=msg.Inputs["filename"], function_name=msg.Inputs["function"])
+        func = await get_file_and_function(filename=msg.Inputs["custom_filename"], function_name=msg.Inputs["custom_function"])
         if func:
-            funcResponse.StdOut = "found the function"
             funcResponse = await func(msg)
+            funcResponse.StdOut = "found the function"
         else:
             funcResponse.StdErr = "failed to find the function"
         funcResponse.EventStepInstanceID = msg.EventStepInstanceID
@@ -71,7 +69,7 @@ class Hydra(Eventing):
     async def execute_script(self, msg: NewCustomEventingMessage) -> NewCustomEventingMessageResponse:
         logger.info("called execute_script")
         funcResponse = NewCustomEventingMessageResponse(Success=False)
-        func = await get_file_and_function(filename=msg.Inputs["filename"], function_name=msg.Inputs["function"])
+        func = await get_file_and_function(filename=msg.Inputs["custom_filename"], function_name=msg.Inputs["custom_function"])
         if func:
             funcResponse.StdOut = "found the function"
             funcResponse = await func(msg)

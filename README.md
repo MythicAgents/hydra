@@ -19,7 +19,7 @@ and you can access it via `msg.Inputs["myToken"]` to get the `apitoken` to use i
 
 ## Accessing Custom Functions
 
-You can reference any of these specific functions as part of you eventing scripts by calling out the `filename` and `function` you want to execute as part of the `Input` field in a step.
+You can reference any of these specific functions as part of you eventing scripts by calling out the `custom_filename` and `custom_function` you want to execute as part of the `Input` field in a step.
 
 ### Custom Function
 
@@ -49,19 +49,19 @@ steps:
         function_name: execute_script
       environment: {}
       inputs:
-        filename: testing.py
-        function: some_name
+        custom_filename: testing.py
+        custom_function: some_name
       outputs: {}
 ```
 
-You will want to specify the `container_name` as `hydra` and the `function_name` (within hydra) as `execute_script`, then your `filename` refers to the python file where your custom function lives and `function` is the name of your function.
+You will want to specify the `container_name` as `hydra` and the `function_name` (within hydra) as `execute_script`, then your `custom_filename` refers to the python file where your custom function lives and `custom_function` is the name of your function.
 
 ### Conditional Check
 
 This action would allow you to programmatically determine if other steps should be skipped or not. If you're wanting to use a `conditional_check` script then your function should match:
 ```python
 from mythic_container.EventingBase import *
-async def some_name(self, msg: ConditionalCheckEventingMessage) -> ConditionalCheckEventingMessageResponse:
+async def some_name(msg: ConditionalCheckEventingMessage) -> ConditionalCheckEventingMessageResponse:
     return ConditionalCheckEventingMessageResponse(Success=True)
 ```
 
@@ -100,12 +100,12 @@ steps:
         - skip me
     environment: {}
     inputs:
-      filename: testing.py
-      function: some_name
+      custom_filename: testing.py
+      custom_function: some_name
     outputs: {}
 ```
 
-You will want to specify the `container_name` as `hydra` and the `function_name` (within hydra) as `execute_script`, then your `filename` refers to the python file where your custom function lives and `function` is the name of your function.
+You will want to specify the `container_name` as `hydra` and the `function_name` (within hydra) as `execute_script`, then your `custom_filename` refers to the python file where your custom function lives and `custom_function` is the name of your function.
 
 ### Task Intercept
 
@@ -133,11 +133,11 @@ steps:
       container_name: hydra
     environment: {}
     inputs:
-      filename: testing.py
-      function: some_name
+      custom_filename: testing.py
+      custom_function: some_name
 ```
 
-You will want to specify the `container_name` as `hydra`, then your `filename` refers to the python file where your custom function lives and `function` is the name of your function.
+You will want to specify the `container_name` as `hydra`, then your `custom_filename` refers to the python file where your custom function lives and `custom_function` is the name of your function.
 
 
 ### Response Intercept
@@ -167,11 +167,11 @@ steps:
       container_name: hydra
     environment: {}
     inputs:
-      filename: testing.py
-      function: some_name
+      custom_filename: testing.py
+      custom_function: some_name
 ```
 
-You will want to specify the `container_name` as `hydra`, then your `filename` refers to the python file where your custom function lives and `function` is the name of your function.
+You will want to specify the `container_name` as `hydra`, then your `custom_filename` refers to the python file where your custom function lives and `custom_function` is the name of your function.
 
 
 ## Installation
