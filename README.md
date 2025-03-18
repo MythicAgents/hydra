@@ -17,6 +17,15 @@ myToken: mythic.apitoken
 ```
 and you can access it via `msg.Inputs["myToken"]` to get the `apitoken` to use in your `await mythic.login(apitoken=msg.Inputs["myToken"])` style call.
 
+### Debugging
+
+If you run a eventing step and it fails, you can always view the stdout/stderr of the step in Mythic's UI by doing the following: 
+* Go to the Eventing page
+* Either find the instance of your workflow on the main table, or click on the left-hand side for the name of your workflow and from the more condense table find your workflow instance
+* Click the share icon to bring that instance up to the main graph at the top
+* Right-click the step that you want to inspect and select "View Details"
+* There will now be a stdout/stderr section you can expand to see more specific details
+
 ## Accessing Custom Functions
 
 You can reference any of these specific functions as part of you eventing scripts by calling out the `custom_filename` and `custom_function` you want to execute as part of the `Input` field in a step.
@@ -26,7 +35,7 @@ You can reference any of these specific functions as part of you eventing script
 This action would allow you, as a step in your workflow, execute arbitrary python / scripting code before the next step runs. If you're wanting to use a `custom_function` script then your function should match:
 ```python
 from mythic_container.EventingBase import *
-async def some_name(self, msg: NewCustomEventingMessage) -> NewCustomEventingMessageResponse:
+async def some_name(msg: NewCustomEventingMessage) -> NewCustomEventingMessageResponse:
         return NewCustomEventingMessageResponse(Success=True)
 ```
 
